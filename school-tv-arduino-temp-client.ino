@@ -1,10 +1,10 @@
 #include "WiFiS3.h"
 #include <DHT11.h>
 
-#define WIFI_SSID "wifi_name"
-#define WIFI_PASSWORD "wifi_password"
+#define WIFI_SSID "wifiname"
+#define WIFI_PASSWORD "wifipassword"
 
-#define USE_HTTPS  // Comment out this line to use HTTP in development mode
+//#define USE_HTTPS  // Comment out this line to use HTTP in development mode
 
 // Server details
 #ifdef USE_HTTPS
@@ -12,12 +12,12 @@
   #define SERVER_PORT 443
   WiFiSSLClient client;  // Use SSL client for HTTPS
 #else
-  #define SERVER "127.0.0.1"
+  #define SERVER "192.168.30.131"
   #define SERVER_PORT 5000
   WiFiClient client;      // Use regular client for HTTP
 #endif
 
-#define PASSWORD "your_password_here"  // Change this as needed
+#define PASSWORD "uploadtemperature"  // Change this as needed
 
 
 // Network credentials
@@ -26,8 +26,8 @@ char pass[] = WIFI_PASSWORD;
 
 DHT11 dht11(7);
 
-unsigned long lastConnectionTime = 0;
 const unsigned long postingInterval = 60L * 1000L; // every 60 seconds
+unsigned long lastConnectionTime = postingInterval;
 
 void setup() {
   Serial.begin(9600);
@@ -81,8 +81,6 @@ void loop() {
   // purposes only:
   read_request();
   
-  // if ten seconds have passed since your last connection,
-  // then connect again and send data:
   if (millis() - lastConnectionTime > postingInterval) {
     httpRequest();
   }
@@ -113,6 +111,8 @@ void httpRequest() {
     client.println("POST /temperature/upload HTTP/1.1"); // Adjust the URL path
     client.print("Host: ");
     client.println(SERVER);
+    client.print("Password: ");
+    client.println(PASSWORD);
     client.println("Content-Type: application/json"); // Set the content type, assuming JSON data
     client.println("Connection: close");
     client.println("User-Agent: TeknikTvArduino/1.0");
