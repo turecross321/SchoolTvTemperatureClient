@@ -1,24 +1,28 @@
 #include "WiFiS3.h"
 #include <DHT11.h>
 
-// Network credentials
-char ssid[] = "tekniklabbet";
-char pass[] = "tekniklabbet";
+#define WIFI_SSID "wifi_name"
+#define WIFI_PASSWORD "wifi_password"
 
 #define USE_HTTPS  // Comment out this line to use HTTP in development mode
 
 // Server details
 #ifdef USE_HTTPS
   #define SERVER "example.com"
-  #define PORT 443
+  #define SERVER_PORT 443
   WiFiSSLClient client;  // Use SSL client for HTTPS
 #else
   #define SERVER "127.0.0.1"
-  #define PORT 5000
+  #define SERVER_PORT 5000
   WiFiClient client;      // Use regular client for HTTP
 #endif
 
 #define PASSWORD "your_password_here"  // Change this as needed
+
+
+// Network credentials
+char ssid[] = WIFI_SSID;
+char pass[] = WIFI_PASSWORD;
 
 DHT11 dht11(7);
 
@@ -42,7 +46,7 @@ void setup() {
     Serial.println("Please upgrade the firmware");
   }
 
-  // attempt to connect to WiFi network:
+  int status = WL_IDLE_STATUS;
   while (status != WL_CONNECTED) {
     Serial.print("Attempting to connect to SSID: ");
     Serial.println(ssid);
@@ -102,12 +106,13 @@ void httpRequest() {
   }
 
   // if there's a successful connection:
-  if (client.connect(SERVER_IP, SERVER_PORT)) {
+  if (client.connect(SERVER, SERVER_PORT)) {
     Serial.println("connecting...");
 
     // send the HTTP POST request:
     client.println("POST /temperature/upload HTTP/1.1"); // Adjust the URL path
-    client.println("Host: 192.168.30.131");       // Adjust the host IP or domain
+    client.print("Host: ");
+    client.println(SERVER);
     client.println("Content-Type: application/json"); // Set the content type, assuming JSON data
     client.println("Connection: close");
     client.println("User-Agent: TeknikTvArduino/1.0");
